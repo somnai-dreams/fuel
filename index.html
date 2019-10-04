@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive Landscape | Demo 1 | Codrops</title>
+    <meta name="description" content="An interactive animated landscape built with three.js" />
+    <meta name="keywords" content="three.js, javascript, webgl, animation, landscape, interactive, demo" />
+    <meta name="author" content="Codrops" />
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Barlow:400,800" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/base.css" />
+    <script>
+        document.documentElement.className = "js";
+        var supportsCssVars = function() {
+            var e, t = document.createElement("style");
+            return t.innerHTML = "root: { --tmp-var: bold; }", document.head.appendChild(t), e = !!(window.CSS && window.CSS.supports && window.CSS.supports("font-weight", "var(--tmp-var)")), t.parentNode.removeChild(t), e
+        };
+        supportsCssVars() || alert("Please view this demo in a modern browser that supports CSS Variables.");
+    </script>
+
+    <style>
+        img#target {
+            position: absolute;
+            /*			width: 40px;*/
+            transform-origin: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            user-drag: none;
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-drag: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            z-index: 200;
+        }
+
+        .trail {
+            position: absolute;
+            /*			width: 40px;*/
+            transform-origin: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            user-drag: none;
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-drag: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            z-index: 201;
+            border-radius: 100%;
+            background: white;
+        }
+    </style>
+</head>
+
+<body class="demo-1">
+    <main>
+        <div id="images">
+<!--            <img id="target" src="fire.png">-->
+        </div>
+        <div class="frame">
+
+        </div>
+        <div class="content">
+            <canvas class="landscape"></canvas>
+            <script id="custom-vertex" type="x-shader/x-vertex">
+
+                //
+					// GLSL textureless classic 3D noise "cnoise",
+					// with an RSL-style periodic variant "pnoise".
+					// Author:  Stefan Gustavson (stefan.gustavson@liu.se)
+					// Version: 2011-10-11
+					//
+					// Many thanks to Ian McEwan of Ashima Arts for the
+					// ideas for permutation and gradient selection.
+					//
+					// Copyright (c) 2011 Stefan Gustavson. All rights reserved.
+					// Distributed under the MIT license. See LICENSE file.
+					// https://github.com/stegu/webgl-noise
+					//
+				
+					vec3 mod289(vec3 x)
+					{
+						return x - floor(x * (1.0 / 289.0)) * 289.0;
+					}
+				
+					vec4 mod289(vec4 x)
+					{
+						return x - floor(x * (1.0 / 289.0)) * 289.0;
+					}
+				
+					vec4 permute(vec4 x)
+					{
+						return mod289(((x*34.0)+1.0)*x);
+					}
+				
+					vec4 taylorInvSqrt(vec4 r)
+					{
+						return 1.79284291400159 - 0.85373472095314 * r;
+					}
+				
+					vec3 fade(vec3 t) {
+						return t*t*t*(t*(t*6.0-15.0)+10.0);
+					}
+				
+					// Classic Perlin noise
+					float cnoise(vec3 P)
+					{
+						vec3 Pi0 = floor(P); // Integer part for indexing
+						vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
+						Pi0 = mod289(Pi0);
+						Pi1 = mod289(Pi1);
+						vec3 Pf0 = fract(P); // Fractional part for interpolation
+						vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+						vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+						vec4 iy = vec4(Pi0.yy, Pi1.yy);
+						vec4 iz0 = Pi0.zzzz;
+						vec4 iz1 = Pi1.zzzz;
+				
+						vec4 ixy = permute(permute(ix) + iy);
+						vec4 ixy0 = permute(ixy + iz0);
+						vec4 ixy1 = permute(ixy + iz1);
+				
+						vec4 gx0 = ixy0 * (1.0 / 7.0);
+						vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+						gx0 = fract(gx0);
+						vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+						vec4 sz0 = step(gz0, vec4(0.0));
+						gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+						gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+				
+						vec4 gx1 = ixy1 * (1.0 / 7.0);
+						vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+						gx1 = fract(gx1);
+						vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+						vec4 sz1 = step(gz1, vec4(0.0));
+						gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+						gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+				
+						vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+						vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+						vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+						vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+						vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+						vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+						vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+						vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+				
+						vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+						g000 *= norm0.x;
+						g010 *= norm0.y;
+						g100 *= norm0.z;
+						g110 *= norm0.w;
+						vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+						g001 *= norm1.x;
+						g011 *= norm1.y;
+						g101 *= norm1.z;
+						g111 *= norm1.w;
+				
+						float n000 = dot(g000, Pf0);
+						float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+						float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+						float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+						float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+						float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+						float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+						float n111 = dot(g111, Pf1);
+				
+						vec3 fade_xyz = fade(Pf0);
+						vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+						vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+						float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+						return 2.2 * n_xyz;
+					}
+				
+					// Classic Perlin noise, periodic variant
+					float pnoise(vec3 P, vec3 rep)
+					{
+						vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period
+						vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period
+						Pi0 = mod289(Pi0);
+						Pi1 = mod289(Pi1);
+						vec3 Pf0 = fract(P); // Fractional part for interpolation
+						vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+						vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+						vec4 iy = vec4(Pi0.yy, Pi1.yy);
+						vec4 iz0 = Pi0.zzzz;
+						vec4 iz1 = Pi1.zzzz;
+				
+						vec4 ixy = permute(permute(ix) + iy);
+						vec4 ixy0 = permute(ixy + iz0);
+						vec4 ixy1 = permute(ixy + iz1);
+				
+						vec4 gx0 = ixy0 * (1.0 / 7.0);
+						vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+						gx0 = fract(gx0);
+						vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+						vec4 sz0 = step(gz0, vec4(0.0));
+						gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+						gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+				
+						vec4 gx1 = ixy1 * (1.0 / 7.0);
+						vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+						gx1 = fract(gx1);
+						vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+						vec4 sz1 = step(gz1, vec4(0.0));
+						gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+						gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+				
+						vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+						vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+						vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+						vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+						vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+						vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+						vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+						vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+				
+						vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+						g000 *= norm0.x;
+						g010 *= norm0.y;
+						g100 *= norm0.z;
+						g110 *= norm0.w;
+						vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+						g001 *= norm1.x;
+						g011 *= norm1.y;
+						g101 *= norm1.z;
+						g111 *= norm1.w;
+				
+						float n000 = dot(g000, Pf0);
+						float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+						float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+						float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+						float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+						float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+						float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+						float n111 = dot(g111, Pf1);
+				
+						vec3 fade_xyz = fade(Pf0);
+						vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+						vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+						float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+						return 2.2 * n_xyz;
+					}
+
+					#define PI 3.1415926535897932384626433832795
+					
+					uniform float time;
+					uniform float maxHeight;
+					uniform float speed;
+					uniform float distortCenter;
+					uniform float roadWidth;
+					varying float vDisplace;
+
+					varying float fogDepth;
+
+					void main(){
+
+						float t = time * speed;
+						float wRoad = distortCenter;
+						float wRoad2 = wRoad * 0.5;
+						
+						float angleCenter = uv.y * PI*4.0;
+						angleCenter += t * 0.9;
+						
+						float centerOff = (
+							sin(angleCenter) + 
+							sin(angleCenter*0.5) 
+						) * wRoad;
+
+						
+						vec3 noiseIn = vec3(uv, 1.0)*10.0;
+						float noise = cnoise(vec3(noiseIn.x, noiseIn.y + t, noiseIn.z));
+						noise += 1.0;
+						float h = noise;
+						float angle = (uv.x - centerOff) * PI;
+						float f = abs(cos(angle));
+						h *= pow(f, 1.5 + roadWidth);
+						
+
+						vDisplace = h;
+						
+
+						h*=maxHeight;
+
+						vec3 transformed = vec3( position.x, position.y, position.z + h );
+
+
+						vec4 mvPosition = modelViewMatrix * vec4( transformed, 1.0 );
+						gl_Position = projectionMatrix * mvPosition;
+						
+						fogDepth = -mvPosition.z;
+
+					}
+
+				</script>
+            <script id="custom-fragment" type="x-shader/x-fragment">
+                uniform float time;
+					uniform vec3 color;
+					uniform sampler2D pallete;
+					varying float vDisplace;
+
+					uniform vec3 fogColor;
+					uniform float fogNear;
+					uniform float fogFar;
+					varying float fogDepth;
+
+					void main(){
+
+						vec2 stripPos = vec2( 0.0, vDisplace );
+						vec4 stripColor = texture2D( pallete, stripPos );
+						stripColor *= pow(1.0-vDisplace, 1.0);
+
+						gl_FragColor = stripColor;
+
+						#ifdef USE_FOG
+							float fogFactor = smoothstep( fogNear, fogFar, fogDepth );
+							gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+						#endif
+					}
+
+				</script>
+            <h2 id="content__title" class="content__title">GOOD JOB</h2>
+            <p class="content__subtitle"></p>
+
+        </div>
+        <div class="overlay"></div>
+    </main>
+    <script src="js/vendor/three.min.js"></script>
+    <script src="js/vendor/Sky.js"></script>
+    <script src="js/vendor/hammer.min.js"></script>
+    <script src="js/vendor/charming.min.js"></script>
+    <script src="js/vendor/TweenMax.min.js"></script>
+    <script src="js/OBJLoader.js"></script>
+    <script src="js/demo1.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src='pathAnimator.js'></script>
+    <script>
+        /*----------------------------------------------------------
+			Page Configuration
+		-----------------------------------------------------------*/
+        (function() {
+            var path = "M919.75,533.78c103.27,1.2,206.23-3.97,306.93-25.84c19.36-4.2,41.6-11.68,47.67-30.54  c5.86-18.23-8.19-38.25-26.11-45c-17.92-6.75-38.01-3.35-56.38,2.03c-70.28,20.58-129.59,67.86-197.29,95.79  c-21.66,8.94-44.92,15.96-68.23,13.54c-27.93-2.9-52.48-18.85-77.79-31.03C782.56,481,704.99,474.05,634.4,493.55  c-40.81,11.28-79.89,31.13-122.17,33.27c-19.08,0.96-39.34-2.21-54.22-14.21c-14.88-11.99-22.24-34.55-12.68-51.09  c7.15-12.37,21.49-18.65,35.35-22.08c33.76-8.37,70.46-4.27,101.54,11.33c41.5,20.84,72.35,60.78,116.39,75.49  c48.14,16.07,100.96-1.72,145.83-25.43c44.87-23.71,87.55-53.89,137.1-64.89c137.67-30.54,274.15,95.11,412.04,65.57  c22.18-4.75,47.77-20.35,44.19-42.76c-1.29-8.04-6.34-14.99-12.05-20.8c-29.41-29.96-77.16-35.49-117.56-24.06  c-40.4,11.43-75.08,37.08-108.05,63.09c-32.97,26-65.91,53.28-104.87,68.93c-73.91,29.68-159.3,13.7-234.86,38.9  c-25.58,8.53-55.01,21.34-77.56,6.56c-14.62-9.58-20.55-27.61-27.76-43.54c-40.05-88.55-153.65-135.63-244.6-101.36  c-21.21,7.99-41.61,20.31-54.31,39.08s-16.21,44.85-4.39,64.18c16.44,26.91,53.1,31.13,84.61,32.48  c27.48,1.18,54.96,2.36,82.44,3.53c22.86,0.98,48.32,1.08,65.28-14.29c12.14-11,17.18-27.72,20.24-43.81  c6.5-34.18,5.29-72.95-17.42-99.32c-24.17-28.07-70.83-32.96-100.3-10.52s-37.16,68.72-16.53,99.48  c14.86,22.16,40.35,34.49,65.19,44.25c45.96,18.08,93.8,30.88,141.51,43.64c98.37,26.31,201.64,51.38,300.33,13.5  c66.28-25.44,125.57-63.19,195.62-79.24c27.51-6.3,55.56-10.06,83.72-11.85c24.58-4.57,50.15-15.9,65.96-35.24  c34.87-42.2,2.23-104.08-43.87-124.14c-60.34-26.94-183.26-26.19-215.55,20.46c-35.65,48.23,8.33,105.43,23.27,158.3  c19.53,71.9-22.07,103.8-86.26,100.68c-312.07-25.26-74.51-277.26-278.91-296.22c-93.6-5.56-182.04,24.84-272.1,46.1  c-82.74,14.08-198.87,46.55-138.66,143.27C511.89,657.09,583.67,617.07,621.8,644.1c54.07,42.64-6.29,109.17-62.1,90.27  c-77.91-22.11-98.92-142.22,1.5-134.24c44.31,2.04,84.2,25.45,127.29,38.27c140.49,38.62,209.37,2.71,198.37-142.48  c-6.55-62.32-42.17-83.05-93.64-76.13c-32.3,1.19-43.1,19.68-37.66,46.39c10.75,57.8,134.26,98.5,169.58,64.59  c147.03-106.96,126.61-161.11,226.09-142.99c64.02,14.77,124.88,57,142.72,120.04c29.06,118.13-91.56,180.09-172.28,92.69  C964.7,448.32,990.74,387.24,833.73,380.71c-315.96-21.22-121.77,48.46-244.46,143.96C427.58,613.61,291.98,401.27,428,365.32  c138.96-13.47,172.04,126.29,236.13,146.78c185.04,58,204.47-81.41,133.43-108.2C686.23,385.8,679.31,563.65,912.7,549.39  c33.99,0.29,65.68,0.95,99.13,7.57c98.65,18.92,191.94,72.29,294.23,59.96c89.71-10.8,164.73-82.7,133.78-172.07  c-30.14-86.3-144.98-66.23-162.18-32.26c-16.64,26.25-10.14,61.42-28.03,87.82c-17.49,25.87-50.01,34.17-82.12,37.41  c-105.21,13.93-94.08-72.48-131.47-131.21c-35.82-52.88-123.24-58.22-163.41-7.71c-90.89,139.52-120.69,165.64-286.51,134.95  c-51.7-8.71-102.44-15.57-147.7,6.81C262.07,659.4,620.72,734.85,676.16,705.6c93.48-27.31,89.19-207.53,63.4-234.28  c-12.99-18.58-37.17-25.03-60.13-24.97c-117.82-5.41-69.7,126.15,7.21,148.24c77.49,26.47,160.55,18.32,241.04,24.93  c78.99,2.24,153.84,23.47,227.5,51.83c290.56,107.43,331.8-186.32,161.45-177.83c-93.69,9.49-48.38,172.75,129.85,86.42  c57.64-23.69,100.74-28.43,113.95-66.09c24.6-80.87-16.06-145.56-93.72-170.94c-35.89-11.73-76.69-16.85-110.3,0.37  c-29.79,15.25-48.63,45.07-69.7,71.06c-30.75,37.92-69.67,70.28-115.43,87.31c-45.76,17.02-98.76,17.48-142.22-4.76  c-43.46-22.24-75.14-68.81-73.82-117.61c0.39-14.4,4.3-29.99,15.83-38.62c8.67-6.48,20.05-7.85,30.86-8.37  c29.87-1.45,59.98,1.84,88.83,9.72c24.1,6.58,48.73,17.47,62.48,38.33c20.44,30.99,8.91,75.53-18.4,100.67  s-66.13,33.96-103.25,34.64s-74.01-5.77-111.12-6.66c-37.11-0.89-76.04,4.46-106.31,25.95c-22.24,15.8-38.44,39.9-44.67,66.46  c-5.04,21.47-2.43,46.9,14.38,61.18c8.26,7.02,18.9,10.47,29.31,13.46c57.86,16.6,118.41,23.77,178.55,21.13  c33.52-1.47,67.67-6.2,97.52-21.53c29.85-15.33,54.98-42.79,60.49-75.89c5.51-33.1-12.85-70.58-44.86-80.62  c-28.61-8.97-60.91,5.52-79.28,29.2c-13.97,18.01-21.25,42.71-13.35,64.09c9.54,25.82,37.47,39.63,63.9,47.34  c62.64,18.28,129.17,16.32,193.85,24.93c46.78,6.23,95.74,17.83,139.97,1.36c60.43-22.51,92.17-93.41,87.29-157.71  c-3.23-42.5-21.21-85.78-56.05-110.34c-24.14-17.02-54.08-23.72-83.47-26.66c-37.37-3.74-76.29-1.76-110.53,13.67  c-39.29,17.7-68.75,51.15-101.41,79.25c-71.34,61.37-162.63,99.16-256.48,106.18c-19.22,1.44-39.13,1.51-57.01-5.69  c-42.25-17.03-58.95-67.12-68.73-111.61c-4.18-19.03-7.91-39.45-0.66-57.54c10.78-26.88,42.31-39.41,71.21-41.2  c23.56-1.46,48.12,2.55,67.84,15.53c19.72,12.98,33.7,35.93,31.98,59.48c-2.9,39.67-48.22,64.7-87.87,61.47  c-39.65-3.24-74.55-26.03-108.73-46.38c-71.75-42.72-151.29-78.1-234.79-78.07c-49.7,0.02-103.37,15.61-131.76,56.4  c-30.83,44.31-22.6,107.03,6.26,152.64c29.04,45.89,77.37,79.13,130.61,89.82c49.03,9.85,99.6,1.19,149.56-0.96  c49.96-2.15,104.05,3.84,141.55,36.92c9.8,8.64,18.72,21.2,15.4,33.83c-3.42,13.02-17.92,19.43-30.97,22.77  c-46.82,11.99-97.72,7.34-141.59-12.94c-21-9.71-41-23.51-52.82-43.4s-13.83-46.73-0.49-65.64c14.08-19.94,40.46-26.4,64.7-29.35  c145.23-17.69,291.27,37.26,437.05,24.92c47.03-3.98,96.63-16.83,127.84-52.24c19.97-22.66,30.3-52.45,34.69-82.33  c6.34-43.16,0.46-89.46-23.87-125.67c-32.5-48.37-91.77-71.27-148.98-82.38c-79.98-15.52-163.34-13.42-242.43,6.12  c-44.82,11.07-89.63,28.53-122.49,60.97c-24.83,24.51-42.12,60.79-32.23,94.26c13.63,46.12,70.15,64.39,118.21,62.76  c52.81-1.79,103.78-18.56,154.24-34.25c50.45-15.69,102.32-30.59,155.11-28.45c52.79,2.14,107.48,24.13,136.39,68.36  c19.36,29.62,22.83,74.59-4.99,96.47c-11.63,9.15-26.65,12.66-41.28,14.93c-79.66,12.37-161.05-5.06-237.69-30.05  c-76.64-24.99-150.89-57.63-229.11-77.13C630.01,517,520.7,514.95,416.33,536.84c-23.84,5-50.58,13.83-59.99,36.29  c-11.58,27.66,10.75,58.28,36.1,74.3c26.24,16.58,60.05,25.3,88.51,12.89c24.62-10.74,40.57-34.99,51.54-59.51  c17.25-38.57,25.71-81.04,24.56-123.27c-0.33-12.05-2.38-25.78-12.43-32.44c-6.84-4.53-15.64-4.49-23.84-4.08  c-15.84,0.79-32.57,2.72-45.19,12.33c-12.62,9.61-18.72,29.43-8.7,41.73c5.48,6.73,14.24,9.71,22.63,11.92  c61.46,16.19,126.98,7.43,188.12-9.91c61.15-17.34,119.64-43.01,180.48-61.39c110.11-33.25,228.98-41.93,340.64-14.34  c24.89,6.15,50.57,14.82,67.81,33.81c17.23,18.99,22.38,51.12,4.79,69.78c-13.56,14.38-36.66,16.55-55.08,9.36  c-18.42-7.18-32.79-22.05-44.5-37.98c-21.18-28.81-35.78-66.88-22.71-100.16c18-45.81,76.58-58.64,125.8-57.83  c49.85,0.82,100.42,9.08,144.8,31.79c44.38,22.7,82.13,61.09,96.87,108.71c14.75,47.62,3.41,104.2-33.66,137.53  c-24.94,22.42-58.72,32.84-92.11,35.97c-50.94,4.77-103.25-6.33-147.85-31.4c-104.28-58.6-156.85-183.8-259.74-244.79  c-57.9-34.32-126.99-45.11-194.3-45.54c-55.58-0.35-112.88,6.42-161.46,33.43c-48.58,27.01-86.86,77.65-86.59,133.23  c0.2,42.2,22.42,82.27,53.5,110.82s70.35,46.74,110.45,59.9c40.31,13.23,83.55,21.86,125.11,13.35  c47.4-9.71,87.27-40.34,127.47-67.25c59.99-40.16,124.93-73.88,194.54-92.99c57.88-15.89,129.36-17.43,167.56,28.86  c19.31,23.4,24.59,61.36,3.25,82.93c-13.55,13.7-33.93,17.63-53.08,19.83c-71.22,8.16-150.69-1.6-200.6-53.05  c-62.25-64.17-60.3-173.29-125.98-233.94c-37.22-34.38-90.22-46.62-140.89-47.15c-50.04-0.52-101.3,9.61-143.37,36.71  c-42.07,27.09-73.74,72.73-76.54,122.7c-3.58,64.06,40.68,123.68,96.88,154.63c56.2,30.96,122.34,38.02,186.5,38.91  c62.28,0.87,132.03-7.01,172.04-54.75c38.68-46.14,34.24-119.96-4.04-166.42c-38.28-46.47-103.96-65.58-163.26-55.19  c-59.3,10.38-111.85,47.25-149.43,94.28c-7.97,9.97-14.7,26.18-4.47,33.82c3.92,2.92,9.12,3.28,14,3.52  C793.39,529.93,856.63,533.05,919.75,533.78z",
+                firstWalkerObj = $('img')[0],
+                //                backgroundImg = $('img')[1],
+                walkers = [];
+
+            // handles whatever moves along the path
+            function AnimateWalker(walker) {
+                this.pathAnimator = new PathAnimator(path, {
+                    duration: 30,
+                    step: this.step.bind(this),
+                    reverse: false,
+                    onDone: this.finish.bind(this),
+                    //                    fps      : 5,
+                });
+
+                this.walker = walker;
+            }
+
+            AnimateWalker.prototype = {
+                start: function() {
+                    this.startOffset = (this.reverse || this.speed < 0) ? 100 : 0; // if in reversed mode, then animation should start from the end, I.E 100%
+                    this.pathAnimator.start();
+                },
+
+                // Execute every "frame"
+                step: function(point, angle) {
+                    var stretchFactor = 1,
+                        scale = this.pathAnimator.percent < 50 ? this.pathAnimator.percent : 50 - (this.pathAnimator.percent - 50);
+
+                    scale = (scale / 30) + 0.5;
+
+                    this.walker.style.cssText = "top:" + point.y * stretchFactor + "px;" +
+                        "left:" + point.x * stretchFactor + "px;"
+
+//                    for (i = 1; i < 30; i++) {
+//                        trail = document.getElementById("div" + i);
+//                        topNew = point.y * stretchFactor - (i * 3);
+//                        leftNew = point.x * stretchFactor - (i * 3);
+//                        trail.style.cssText = "top:" + topNew + "px;" + "left:" + leftNew + "px;";
+//                    }
+
+
+                    //                                                +"transform:rotate(" + angle + "deg) "
+                    ; //scale("+ scale +");
+                    //                    backgroundImg.style.cssText = "top:" + point.y * stretchFactor + "px;" +
+                    //												"left:" + point.x * stretchFactor + "px;" ;//scale("+ scale +");
+                },
+
+                // Restart animation once it was finished
+                finish: function() {
+                    this.start();
+                },
+
+                // Resume animation from the last completed percentage (also updates the animation with new settings' values)
+                resume: function() {
+                    this.pathAnimator.start(this.speed, this.step, this.reverse, this.pathAnimator.percent, this.finish, this.easing);
+                }
+            }
+
+            function generateWalker(walkerObj) {
+                var newAnimatedWalker = new AnimateWalker(walkerObj);
+                walkers.push(newAnimatedWalker);
+                return newAnimatedWalker;
+
+            }
+
+
+//            for (i = 1; i < 30; i++) {
+//                console.log(i);
+//                var divAdd = document.createElement("div"); // Create a <button> element
+//                divAdd.style.cssText = "width:" + i * 3 + "px; height:" + i * 3 + "px;";
+//                divAdd.setAttribute('class', 'trail'); // Insert text
+//                divAdd.setAttribute('id', 'div' + i); // Insert text
+////                document.getElementById('images').appendChild(divAdd);
+//            };
+            
+           
+
+            // start "animating" the first Walker on the page
+//            generateWalker(firstWalkerObj).start();
+            // bind the first Controller to the first Walker
+            var firstController = $('menu > div:first');
+            firstController.data('walker', walkers[0]);
+
+//            firstWalkerObj.onclick = function() {
+//                console.log('You sunk my battleship!');
+//            };
+            //            backgroundImg.onclick = function(){
+            //                console.log('Sucka!');
+            //            };
+        })();
+    </script>
+
+</body>
+
+</html>
