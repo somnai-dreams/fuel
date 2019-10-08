@@ -12,6 +12,7 @@ function createLandscape(params) {
     var terrain;
     var curveNew;
     var be;
+    var curveObject;
     var jet;
     var t = 0;
     var ogPozX;
@@ -36,7 +37,7 @@ function createLandscape(params) {
     var isMobile = typeof window.orientation !== 'undefined'
 
 
-    function onMouseMove(event) {
+    function onMousedown(event) {
 
         mouse2.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse2.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -45,15 +46,23 @@ function createLandscape(params) {
 
         var intersects = raycaster.intersectObject(be);
 
-        if (intersects.length > 0) {
-            console.log('success')
+//        if (intersects.length > 0) {
+//            console.log('success')
+//            success();
+//        } else {
+//            console.log('you suck');
+//            fail();
+//        }
+
+        if ((jetObj.position.x-1 < be.position.x) && (be.position.x < jetObj.position.x+1) && (jetObj.position.y-1 < be.position.y) && (be.position.y < jetObj.position.y+1)){
+             console.log('success')
             success();
-        } else {
+             console.log('target pos :'+ be.position.x, be.position.y);
+        }else {
             console.log('you suck');
             fail();
+             console.log('target pos :'+ be.position.x, be.position.y);
         }
-
-
 
     }
 
@@ -73,7 +82,7 @@ function createLandscape(params) {
         else
             window.addEventListener("mousemove", onInputMove)
 
-        window.addEventListener('mousedown', onMouseMove, false);
+        window.addEventListener('mousedown', onMousedown, false);
 
 
         window.addEventListener("resize", resize)
@@ -119,6 +128,7 @@ function createLandscape(params) {
         be = new THREE.Mesh(geometry, material3);
         be.renderOrder = 20;
         be.name = "target";
+//        be.position.z = -50;
         scene.add(be);
 
         loader.load('jet.obj',
@@ -130,7 +140,7 @@ function createLandscape(params) {
                 jetObj.scale.set(0.04, 0.04, 0.04);
                 jetObj.position.set(0, 10, -100);
                 jetObj.rotation.x = Math.PI / 2;
-                jetObj.rotation.z = Math.PI /1;
+//                jetObj.rotation.z = Math.PI /1;
                 ogRotXjet = jetObj.rotation.x;
                 ogRotYjet = jetObj.rotation.y;
             }
@@ -141,9 +151,9 @@ function createLandscape(params) {
         var NUM_POINTS = 10;
 
         for (var i = 0; i < NUM_POINTS; i++) {
-            var x = Math.random() * (22 - -22) - 22;
-            var y = Math.random() * (19 - -2) - 2;
-            var z = Math.random() * (-40 - -30) - 30;
+            var x = Math.random() * (10 - -10) - 10;
+            var y = (Math.random() * (5 - -5) -5)+10;
+            var z = Math.random() * (-37 - -33) - 33;
             var dotGeometry = new THREE.Vector3(x, y, z);
             pointArray.push(dotGeometry);
         };
@@ -152,17 +162,16 @@ function createLandscape(params) {
         //Create a closed wavey loop
         curveNew = new THREE.CatmullRomCurve3(pointArray, true, "catmullrom", 3);
 
-
         var points = curveNew.getPoints(1000);
         var geometry2 = new THREE.BufferGeometry().setFromPoints(points);
 
         var material2 = new THREE.LineBasicMaterial({
-            color: 0xffffff
+            color: 0xe20f0f
         });
 
         // Create the final object to add to the scene
         var curveObject = new THREE.Line(geometry2, material2);
-        //                  scene.add(curveObject);
+//        scene.add(curveObject);
 
         
         var fuelLine = [ new THREE.Vector3(0, 0, 0),  new THREE.Vector3(2, 2, -20), new THREE.Vector3(5, 5, -50)];       
@@ -315,11 +324,11 @@ function createLandscape(params) {
         
 
         // damping mouse for smoother interaction
-        mouse.xDamped = lerp(mouse.xDamped, mouse.x, 1);
-        mouse.yDamped = lerp(mouse.yDamped, mouse.y, 1);
+        mouse.xDamped = lerp(mouse.xDamped, mouse.x, 0.05);
+        mouse.yDamped = lerp(mouse.yDamped, mouse.y, 0.05);
 
         var time = performance.now() * 0.01;
-        terrain.material.uniforms.time.value = time;
+        terrain.material.uniforms.time.value = time*-1;
         terrain.material.uniforms.distortCenter.value = map(mouse.xDamped, 0, width, -0.1, 0.1);
         terrain.material.uniforms.roadWidth.value = map(mouse.yDamped, 0, height, -0.5, 2.5);
 
@@ -329,17 +338,25 @@ function createLandscape(params) {
         camera.rotation.z =  map(mouse.xDamped, 0, width, ogRotX-0.1, ogRotX+0.1) * -1;
 
 
-        t += 0.001;
+        t += 0.0012;
         var pos = curveNew.getPoint(t);
         be.position.copy(pos);
+        
+        be.position.y = map(mouse.yDamped, 0, height, pos.y+15, pos.y-15);
+        be.position.x = map(mouse.xDamped, 0, width, pos.x-30, pos.x+30);
+        
         if (!!jetObj) {
             jetObj.position.y = map(mouse.yDamped, 0, height, 9, 11);
             jetObj.position.x = map(mouse.xDamped, 0, width, -1, 1);
             jetObj.rotation.y = map(mouse.xDamped, 0, width, ogRotYjet-0.5, ogRotYjet+0.5) ;
             jetObj.rotation.x = map(mouse.yDamped, 0, width, ogRotXjet-0.1, ogRotXjet+0.1) * -1;
+            
+            
         }
 
-
+       
+//        console.log('Jet pos :'+ jetObj.position.x, jetObj.position.y);
+//        console.log('target pos :'+ be.position.x, be.position.y);
 
 
 
