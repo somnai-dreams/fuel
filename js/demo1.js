@@ -13,6 +13,8 @@ function createLandscape(params) {
     var curveNew;
     var be;
     var curveObject;
+    var cylinder1;
+    var cylinder2;
     var jet;
     var t = 0;
     var ogPozX;
@@ -54,14 +56,15 @@ function createLandscape(params) {
 //            fail();
 //        }
 
-        if ((jetObj.position.x-1 < be.position.x) && (be.position.x < jetObj.position.x+1) && (jetObj.position.y-1 < be.position.y) && (be.position.y < jetObj.position.y+1)){
+        if ((jetObj.position.x-1 < be.position.x) && (be.position.x < jetObj.position.x+1) && (jetObj.position.y+2-1 < be.position.y) && (be.position.y < jetObj.position.y+2+1)){
              console.log('success')
             success();
              console.log('target pos :'+ be.position.x, be.position.y);
         }else {
             console.log('you suck');
             fail();
-             console.log('target pos :'+ be.position.x, be.position.y);
+             
+             console.log(be.position.x - jetObj.position.x, (be.position.y - (jetObj.position.y+2)));
         }
 
     }
@@ -116,19 +119,27 @@ function createLandscape(params) {
         var i = new THREE.Mesh(geometry, material);
         i.position.z = -800;
 
-        var geometry = new THREE.SphereGeometry(1, 20, 20);
+        var geometry = new THREE.SphereGeometry(2, 20, 20);
         var material3 = new THREE.MeshLambertMaterial({
             color: 0xfabb2c
         });
         var material4 = new THREE.MeshBasicMaterial({
             color: 0x000000
         });
+                var material2 = new THREE.LineBasicMaterial({
+            color: 0x31d062,
+        });
+        
+        material2.depthTest = false;
+        
+        
+        
         material4.name = "jetColor";
         material3.depthTest = false;
         be = new THREE.Mesh(geometry, material3);
         be.renderOrder = 20;
         be.name = "target";
-//        be.position.z = -50;
+        be.position.z = -100;
         scene.add(be);
 
         loader.load('jet.obj',
@@ -138,7 +149,7 @@ function createLandscape(params) {
                 jetObj = object.children[0];
                 jetObj.material = material4;
                 jetObj.scale.set(0.04, 0.04, 0.04);
-                jetObj.position.set(0, 10, -100);
+                jetObj.position.set(0, 8, -100);
                 jetObj.rotation.x = Math.PI / 2;
 //                jetObj.rotation.z = Math.PI /1;
                 ogRotXjet = jetObj.rotation.x;
@@ -150,10 +161,18 @@ function createLandscape(params) {
 
         var NUM_POINTS = 10;
 
-        for (var i = 0; i < NUM_POINTS; i++) {
-            var x = Math.random() * (10 - -10) - 10;
-            var y = (Math.random() * (5 - -5) -5)+10;
-            var z = Math.random() * (-37 - -33) - 33;
+//        for (var i = 0; i < NUM_POINTS; i++) {
+//            var x = Math.random() * (10 - -10) - 10;
+//            var y = (Math.random() * (5 - -5) -5)+14.5;
+//            var z = Math.random() * (-37 - -33) - 33;
+//            var dotGeometry = new THREE.Vector3(x, y, z);
+//            pointArray.push(dotGeometry);
+//        };
+//        
+         for (var i = 0; i < NUM_POINTS; i++) {
+            var x = Math.random() * (1 - -1) - 1;
+            var y = (Math.random() * (1 - -1) -1)+12;
+            var z = -100;
             var dotGeometry = new THREE.Vector3(x, y, z);
             pointArray.push(dotGeometry);
         };
@@ -164,10 +183,40 @@ function createLandscape(params) {
 
         var points = curveNew.getPoints(1000);
         var geometry2 = new THREE.BufferGeometry().setFromPoints(points);
+        var splineObject = new THREE.Line( geometry2, material2 );
+        splineObject.renderOrder = 21;
+        scene.add(splineObject);
+        
 
-        var material2 = new THREE.LineBasicMaterial({
-            color: 0xe20f0f
-        });
+
+        
+        
+        var geometry = new THREE.CylinderGeometry( 0.2, 0.2, 300, 32 );
+        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+        var cylinder = new THREE.Mesh( geometry, material2 );
+        cylinder.position.set(0, 10, -100);
+        cylinder.renderOrder = 21;
+//        scene.add( cylinder );
+        
+        var cylinder = new THREE.Mesh( geometry, material2 );
+        cylinder.position.set(0, 10, -100);
+        cylinder.rotation.z = Math.PI / 2;
+        cylinder.renderOrder = 21;
+//        scene.add( cylinder );
+        
+        var geometry = new THREE.CylinderGeometry( 0.2, 0.2, 5, 32 );
+        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+        cylinder1 = new THREE.Mesh( geometry, material3 );
+        cylinder1.position.set(0, 10, -100);
+        cylinder1.renderOrder = 22;
+        scene.add( cylinder1 );
+        
+        cylinder2 = new THREE.Mesh( geometry, material3 );
+        cylinder2.position.set(0, 10, -100);
+        cylinder2.rotation.z = Math.PI / 2;
+        cylinder2.renderOrder = 22;
+        scene.add( cylinder2 );
+        
 
         // Create the final object to add to the scene
         var curveObject = new THREE.Line(geometry2, material2);
@@ -186,7 +235,29 @@ function createLandscape(params) {
 //                          scene.add(curveObject2);
 
 
+        var curve3 = new THREE.CatmullRomCurve3( [
+            new THREE.Vector3(-300, 10, -100),
+            new THREE.Vector3(300, 10, -100)
+        ] );
+        var points3 = curve3.getPoints( 1 );
+        var geometry5 = new THREE.BufferGeometry().setFromPoints( points3 );
+        var splineObject = new THREE.Line( geometry5, material2 );
+        splineObject.renderOrder = 20;
+//        scene.add(splineObject);
+        
+        var curve3 = new THREE.CatmullRomCurve3( [
+            new THREE.Vector3(0, -300, -100),
+            new THREE.Vector3(0, 300, -100)
+        ] );
+        var points3 = curve3.getPoints( 1 );
+        var geometry5 = new THREE.BufferGeometry().setFromPoints( points3 );
+        var splineObject = new THREE.Line( geometry5, material2 );
+        splineObject.renderOrder = 20;
+//        scene.add(splineObject);
+        
 
+
+        
 
         renderer = new THREE.WebGLRenderer({
             canvas: container,
@@ -336,20 +407,28 @@ function createLandscape(params) {
         camera.rotation.y =  map(mouse.xDamped, 0, width, ogRotX-0.1, ogRotX+0.1) * -1;
         camera.rotation.x =  map(mouse.yDamped, 0, height, ogRotY-0.1, ogRotY+0.1) * -1;
         camera.rotation.z =  map(mouse.xDamped, 0, width, ogRotX-0.1, ogRotX+0.1) * -1;
-
-
+        
+        
         t += 0.0012;
         var pos = curveNew.getPoint(t);
-        be.position.copy(pos);
         
-        be.position.y = map(mouse.yDamped, 0, height, pos.y+15, pos.y-15);
+//        be.position.copy(pos);
+//        be.position.copy(pos);
+        
+//        be.position.y = map(mouse.yDamped, 0, height, pos.y+25, pos.y-05);
+//        be.position.x = map(mouse.xDamped, 0, width, pos.x-30, pos.x+30);
+        be.position.y = map(mouse.yDamped, 0, height, pos.y+25, pos.y-05);
         be.position.x = map(mouse.xDamped, 0, width, pos.x-30, pos.x+30);
+        cylinder2.position.y = map(mouse.yDamped, 0, height, pos.y+25, pos.y-05);
+        cylinder1.position.x = map(mouse.xDamped, 0, width, pos.x-30, pos.x+30);
+//        cylinder2.position.y = map(mouse.y, 0, height, +40, -20);
+//        cylinder1.position.x = map(mouse.x, 0, width, -30, +30);
         
         if (!!jetObj) {
-            jetObj.position.y = map(mouse.yDamped, 0, height, 9, 11);
-            jetObj.position.x = map(mouse.xDamped, 0, width, -1, 1);
+//            jetObj.position.y = map(mouse.yDamped, 0, height, 9, 11);
+//            jetObj.position.x = map(mouse.xDamped, 0, width, -1, 1);
             jetObj.rotation.y = map(mouse.xDamped, 0, width, ogRotYjet-0.5, ogRotYjet+0.5) ;
-            jetObj.rotation.x = map(mouse.yDamped, 0, width, ogRotXjet-0.1, ogRotXjet+0.1) * -1;
+            jetObj.rotation.x = map(mouse.yDamped, 0, height, ogRotXjet-0.1, ogRotXjet+0.1) * -1;
             
             
         }
