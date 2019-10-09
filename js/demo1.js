@@ -1,6 +1,7 @@
 createLandscape({
     //  palleteImage:'img/pallete5.png'
 })
+    var crashed = false;
 
 function createLandscape(params) {
 
@@ -24,7 +25,14 @@ function createLandscape(params) {
     var ogRotXJet;
     var ogRotYJet;
     var jetObj;
+    var crashCount = 0;
+    //    var crash = false;
+    var over = false;
+    var won = false;
     var loader = new THREE.OBJLoader();
+
+    var NUM_POINTS = 5;
+
 
 
     var raycaster = new THREE.Raycaster();
@@ -41,33 +49,72 @@ function createLandscape(params) {
 
     function onMousedown(event) {
 
-        mouse2.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse2.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        //        mouse2.x = (event.clientX / window.innerWidth) * 2 - 1;
+        //        mouse2.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        //
+        //        raycaster.setFromCamera(mouse2, camera);
+        //
+        //        var intersects = raycaster.intersectObject(be);
+        //
+        //    
+        //
+        //        var deltaX = jetObj.position.x - be.position.x;
+        //        var deltaY = jetObj.position.y - be.position.y + 2;
+        //
+        //        if ((-1 < deltaX) && (deltaX < 1) && (-1 < deltaY) && (deltaY < 1)) {
+        //            console.log('success')
+        //            success();
+        //            console.log(deltaX, deltaY);
+        //        } else {
+        //            console.log('you suck');
+        //            fail();
+        //            console.log(deltaX, deltaY);
+        //
+        //        }
 
-        raycaster.setFromCamera(mouse2, camera);
+    }
 
-        var intersects = raycaster.intersectObject(be);
-
-//        if (intersects.length > 0) {
-//            console.log('success')
-//            success();
-//        } else {
-//            console.log('you suck');
-//            fail();
-//        }
-
-        if ((jetObj.position.x-1 < be.position.x) && (be.position.x < jetObj.position.x+1) && (jetObj.position.y+2-1 < be.position.y) && (be.position.y < jetObj.position.y+2+1)){
-             console.log('success')
-            success();
-             console.log('target pos :'+ be.position.x, be.position.y);
-        }else {
-            console.log('you suck');
-            fail();
-             
-             console.log(be.position.x - jetObj.position.x, (be.position.y - (jetObj.position.y+2)));
+    function onMouseMove() {
+        if (!!jetObj) {
+            var deltaX = jetObj.position.x - be.position.x;
+            var deltaY = jetObj.position.y - be.position.y + 2;
+        }
+        if ((-1 < deltaX) && (deltaX < 1) && (-1 < deltaY) && (deltaY < 1)) {
+            over = true;
+            console.log(over);
+        } else {
+            if (over){
+                crashCount++;
+                if (crashCount > 3){
+                    crashed = true;
+                }
+            }
+            over = false;
         }
 
     }
+    document.getElementById("content__title").innerHTML = 'trest';
+
+    var timeleft = 3;
+    var downloadTimer = setInterval(function () {
+        if (over == true) {
+            document.getElementById("content__title").innerHTML = timeleft;
+            console.log(timeleft);
+            timeleft -= 1;
+            if (timeleft < 0) {
+                clearInterval(downloadTimer);
+                document.getElementById("content__title").innerHTML = "GOOD JOB";
+                animateTitles();
+                won = true;
+            }
+        } else {
+            //          clearInterval(downloadTimer);
+            document.getElementById("content__title").innerHTML = '';
+            timeleft = 3;
+        }
+
+    }, 1000);
+
 
     init();
 
@@ -86,6 +133,9 @@ function createLandscape(params) {
             window.addEventListener("mousemove", onInputMove)
 
         window.addEventListener('mousedown', onMousedown, false);
+
+        window.addEventListener('mousemove', onMouseMove, false);
+
 
 
         window.addEventListener("resize", resize)
@@ -113,7 +163,7 @@ function createLandscape(params) {
 
         var geometry = new THREE.SphereGeometry(600, 100, 100);
         var material = new THREE.MeshLambertMaterial({
-//            color: 0xc91010
+            //            color: 0xc91010
             color: 0xffffff
         });
         var i = new THREE.Mesh(geometry, material);
@@ -126,14 +176,14 @@ function createLandscape(params) {
         var material4 = new THREE.MeshBasicMaterial({
             color: 0x000000
         });
-                var material2 = new THREE.LineBasicMaterial({
+        var material2 = new THREE.LineBasicMaterial({
             color: 0x31d062,
         });
-        
+
         material2.depthTest = false;
-        
-        
-        
+
+
+
         material4.name = "jetColor";
         material3.depthTest = false;
         be = new THREE.Mesh(geometry, material3);
@@ -151,7 +201,7 @@ function createLandscape(params) {
                 jetObj.scale.set(0.04, 0.04, 0.04);
                 jetObj.position.set(0, 8, -100);
                 jetObj.rotation.x = Math.PI / 2;
-//                jetObj.rotation.z = Math.PI /1;
+                //                jetObj.rotation.z = Math.PI /1;
                 ogRotXjet = jetObj.rotation.x;
                 ogRotYjet = jetObj.rotation.y;
             }
@@ -159,23 +209,22 @@ function createLandscape(params) {
 
         var pointArray = [];
 
-        var NUM_POINTS = 10;
 
-//        for (var i = 0; i < NUM_POINTS; i++) {
-//            var x = Math.random() * (10 - -10) - 10;
-//            var y = (Math.random() * (5 - -5) -5)+14.5;
-//            var z = Math.random() * (-37 - -33) - 33;
-//            var dotGeometry = new THREE.Vector3(x, y, z);
-//            pointArray.push(dotGeometry);
-//        };
-//        
-         for (var i = 0; i < NUM_POINTS; i++) {
-            var x = Math.random() * (1 - -1) - 1;
-            var y = (Math.random() * (1 - -1) -1)+12;
+        for (var i = 0; i < NUM_POINTS; i++) {
+            var x = Math.random() * (20 - -20) - 20;
+            var y = (Math.random() * (10 - -10) - 10) + 10;
             var z = -100;
             var dotGeometry = new THREE.Vector3(x, y, z);
             pointArray.push(dotGeometry);
         };
+
+        //         for (var i = 0; i < NUM_POINTS; i++) {
+        //            var x = Math.random() * (1 - -1) - 1;
+        //            var y = (Math.random() * (1 - -1) -1)+12;
+        //            var z = -100;
+        //            var dotGeometry = new THREE.Vector3(x, y, z);
+        //            pointArray.push(dotGeometry);
+        //        };
 
 
         //Create a closed wavey loop
@@ -183,81 +232,85 @@ function createLandscape(params) {
 
         var points = curveNew.getPoints(1000);
         var geometry2 = new THREE.BufferGeometry().setFromPoints(points);
-        var splineObject = new THREE.Line( geometry2, material2 );
+        var splineObject = new THREE.Line(geometry2, material2);
         splineObject.renderOrder = 21;
-        scene.add(splineObject);
-        
+        //        scene.add(splineObject);
 
 
-        
-        
-        var geometry = new THREE.CylinderGeometry( 0.2, 0.2, 300, 32 );
-        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-        var cylinder = new THREE.Mesh( geometry, material2 );
+
+
+
+        var geometry = new THREE.CylinderGeometry(0.2, 0.2, 300, 32);
+        var material = new THREE.MeshBasicMaterial({
+            color: 0xffff00
+        });
+        var cylinder = new THREE.Mesh(geometry, material2);
         cylinder.position.set(0, 10, -100);
         cylinder.renderOrder = 21;
-//        scene.add( cylinder );
-        
-        var cylinder = new THREE.Mesh( geometry, material2 );
+        //        scene.add( cylinder );
+
+        var cylinder = new THREE.Mesh(geometry, material2);
         cylinder.position.set(0, 10, -100);
         cylinder.rotation.z = Math.PI / 2;
         cylinder.renderOrder = 21;
-//        scene.add( cylinder );
-        
-        var geometry = new THREE.CylinderGeometry( 0.2, 0.2, 5, 32 );
-        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-        cylinder1 = new THREE.Mesh( geometry, material3 );
+        //        scene.add( cylinder );
+
+        var geometry = new THREE.CylinderGeometry(0.2, 0.2, 5, 32);
+        var material = new THREE.MeshBasicMaterial({
+            color: 0xffff00
+        });
+        cylinder1 = new THREE.Mesh(geometry, material3);
         cylinder1.position.set(0, 10, -100);
         cylinder1.renderOrder = 22;
-        scene.add( cylinder1 );
-        
-        cylinder2 = new THREE.Mesh( geometry, material3 );
+        scene.add(cylinder1);
+
+        cylinder2 = new THREE.Mesh(geometry, material3);
         cylinder2.position.set(0, 10, -100);
         cylinder2.rotation.z = Math.PI / 2;
         cylinder2.renderOrder = 22;
-        scene.add( cylinder2 );
-        
+        scene.add(cylinder2);
+
 
         // Create the final object to add to the scene
         var curveObject = new THREE.Line(geometry2, material2);
-//        scene.add(curveObject);
+        //        scene.add(curveObject);
 
-        
-        var fuelLine = [ new THREE.Vector3(0, 0, 0),  new THREE.Vector3(2, 2, -20), new THREE.Vector3(5, 5, -50)];       
+
+        var fuelLine = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(2, 2, -20), new THREE.Vector3(5, 5, -50)];
         var curveNew2 = new THREE.CatmullRomCurve3(fuelLine, true, "catmullrom", 3);
         var points2 = curveNew2.getPoints(500);
         var geometry3 = new THREE.BufferGeometry().setFromPoints(points2);
 
-       
+
 
         // Create the final object to add to the scene
         var curveObject2 = new THREE.Line(geometry3, material2);
-//                          scene.add(curveObject2);
+        //                          scene.add(curveObject2);
 
 
-        var curve3 = new THREE.CatmullRomCurve3( [
+        var curve3 = new THREE.CatmullRomCurve3([
             new THREE.Vector3(-300, 10, -100),
             new THREE.Vector3(300, 10, -100)
-        ] );
-        var points3 = curve3.getPoints( 1 );
-        var geometry5 = new THREE.BufferGeometry().setFromPoints( points3 );
-        var splineObject = new THREE.Line( geometry5, material2 );
+        ]);
+        var points3 = curve3.getPoints(1);
+        var geometry5 = new THREE.BufferGeometry().setFromPoints(points3);
+        var splineObject = new THREE.Line(geometry5, material2);
         splineObject.renderOrder = 20;
-//        scene.add(splineObject);
-        
-        var curve3 = new THREE.CatmullRomCurve3( [
+        //        scene.add(splineObject);
+
+        var curve3 = new THREE.CatmullRomCurve3([
             new THREE.Vector3(0, -300, -100),
             new THREE.Vector3(0, 300, -100)
-        ] );
-        var points3 = curve3.getPoints( 1 );
-        var geometry5 = new THREE.BufferGeometry().setFromPoints( points3 );
-        var splineObject = new THREE.Line( geometry5, material2 );
+        ]);
+        var points3 = curve3.getPoints(1);
+        var geometry5 = new THREE.BufferGeometry().setFromPoints(points3);
+        var splineObject = new THREE.Line(geometry5, material2);
         splineObject.renderOrder = 20;
-//        scene.add(splineObject);
-        
+        //        scene.add(splineObject);
 
 
-        
+
+
 
         renderer = new THREE.WebGLRenderer({
             canvas: container,
@@ -369,7 +422,7 @@ function createLandscape(params) {
     }
 
     function onInputMove(e) {
-        
+
         e.preventDefault();
 
         var x, y
@@ -383,7 +436,7 @@ function createLandscape(params) {
 
         mouse.x = x;
         mouse.y = y;
-        
+
 
     }
 
@@ -391,53 +444,49 @@ function createLandscape(params) {
 
     function render() {
         requestAnimationFrame(render)
-        
-        
+
 
         // damping mouse for smoother interaction
         mouse.xDamped = lerp(mouse.xDamped, mouse.x, 0.05);
         mouse.yDamped = lerp(mouse.yDamped, mouse.y, 0.05);
 
         var time = performance.now() * 0.01;
-        terrain.material.uniforms.time.value = time*-1;
+        terrain.material.uniforms.time.value = time * -1;
         terrain.material.uniforms.distortCenter.value = map(mouse.xDamped, 0, width, -0.1, 0.1);
         terrain.material.uniforms.roadWidth.value = map(mouse.yDamped, 0, height, -0.5, 2.5);
 
 
-        camera.rotation.y =  map(mouse.xDamped, 0, width, ogRotX-0.1, ogRotX+0.1) * -1;
-        camera.rotation.x =  map(mouse.yDamped, 0, height, ogRotY-0.1, ogRotY+0.1) * -1;
-        camera.rotation.z =  map(mouse.xDamped, 0, width, ogRotX-0.1, ogRotX+0.1) * -1;
-        
-        
-        t += 0.0012;
+        camera.rotation.y = map(mouse.xDamped, 0, width, ogRotX - 0.1, ogRotX + 0.1) * -1;
+        camera.rotation.x = map(mouse.yDamped, 0, height, ogRotY - 0.1, ogRotY + 0.1) * -1;
+        camera.rotation.z = map(mouse.xDamped, 0, width, ogRotX - 0.1, ogRotX + 0.1) * -1;
+
+
+        t += 0.001;
         var pos = curveNew.getPoint(t);
+
+        //        be.position.copy(pos);
+        var mul = 2;
+
+        be.position.y = map(mouse.yDamped, 0, height, pos.y + 15 * mul, pos.y - 15 * mul);
+        be.position.x = map(mouse.xDamped, 0, width, pos.x - 30 * mul, pos.x + 30 * mul);
+        cylinder2.position.y = map(mouse.yDamped, 0, height, pos.y + 15 * mul, pos.y - 15 * mul);
+        cylinder1.position.x = map(mouse.xDamped, 0, width, pos.x - 30 * mul, pos.x + 30 * mul);
+
         
-//        be.position.copy(pos);
-//        be.position.copy(pos);
-        
-//        be.position.y = map(mouse.yDamped, 0, height, pos.y+25, pos.y-05);
-//        be.position.x = map(mouse.xDamped, 0, width, pos.x-30, pos.x+30);
-        be.position.y = map(mouse.yDamped, 0, height, pos.y+25, pos.y-05);
-        be.position.x = map(mouse.xDamped, 0, width, pos.x-30, pos.x+30);
-        cylinder2.position.y = map(mouse.yDamped, 0, height, pos.y+25, pos.y-05);
-        cylinder1.position.x = map(mouse.xDamped, 0, width, pos.x-30, pos.x+30);
-//        cylinder2.position.y = map(mouse.y, 0, height, +40, -20);
-//        cylinder1.position.x = map(mouse.x, 0, width, -30, +30);
-        
-        if (!!jetObj) {
-//            jetObj.position.y = map(mouse.yDamped, 0, height, 9, 11);
-//            jetObj.position.x = map(mouse.xDamped, 0, width, -1, 1);
-            jetObj.rotation.y = map(mouse.xDamped, 0, width, ogRotYjet-0.5, ogRotYjet+0.5) ;
-            jetObj.rotation.x = map(mouse.yDamped, 0, height, ogRotXjet-0.1, ogRotXjet+0.1) * -1;
-            
-            
+var crashY
+var crashX
+        if (!!jetObj && !crashed) {
+            //            jetObj.position.y = map(mouse.yDamped, 0, height, 9, 11);
+            //            jetObj.position.x = map(mouse.xDamped, 0, width, -1, 1);
+            jetObj.rotation.y = map(mouse.xDamped, 0, width, ogRotYjet - 0.5, ogRotYjet + 0.5);
+            jetObj.rotation.x = map(mouse.yDamped, 0, height, ogRotXjet - 0.1, ogRotXjet + 0.1) * -1;
+           
         }
 
-       
-//        console.log('Jet pos :'+ jetObj.position.x, jetObj.position.y);
-//        console.log('target pos :'+ be.position.x, be.position.y);
-
-
+         
+        
+        
+        crash(jetObj);
 
         renderer.render(scene, camera)
 
@@ -524,7 +573,7 @@ function animateTitles() {
     loop(1500);
 }
 
-fail();
+
 
 function success() {
 
@@ -534,4 +583,23 @@ function success() {
 function fail() {
 
     document.getElementById('content__title').style.display = 'none';
+}
+
+function startFlying() {
+    document.getElementById('introPage').style.display = 'none';
+    document.getElementById('music').play();
+    document.body.classList.add('nocursor');
+    //      var context = new AudioContext();
+
+}
+
+function crash(jetObj) {
+    try {
+        if (crashed) {
+            console.log('crash');
+            jetObj.rotation.y -= 0.005;
+            jetObj.rotation.x += 0.005;
+            jetObj.position.y -= 0.15;
+        }
+    } catch(er){console.log(er)}
 }

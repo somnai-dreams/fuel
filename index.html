@@ -58,12 +58,19 @@
 </head>
 
 <body class="demo-1">
+
+    <audio id="music" autoplay loop>
+      <source src="midair.wav" type="audio/wav">
+    </audio>
+    <div id="introPage">
+        <h1 onClick="startFlying()" class="content__title2">START</h1>
+    </div>
     <main>
         <div id="images">
 <!--            <img id="target" src="fire.png">-->
         </div>
         <div class="frame">
-
+                <h1 id="countdown"></h1>
         </div>
         <div class="content">
             <canvas class="landscape"></canvas>
@@ -324,7 +331,7 @@
 					}
 
 				</script>
-            <h2 id="content__title" class="content__title">GOOD JOB</h2>
+            <h2 id="content__title" class="content__title"></h2>
             <p class="content__subtitle"></p>
 
         </div>
