@@ -417,6 +417,7 @@ loader2.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
             wireframe: false,
             fog: true
         });
+        material.depthTest = false;
 
         terrain = new THREE.Mesh(geometry, material);
         terrain.position.z = -180;
@@ -514,9 +515,10 @@ loader2.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
         terrain.material.uniforms.roadWidth.value = map(mouse.yDamped, 0, height, -0.5, 2.5);
 
 
-        camera.rotation.y = map(mouse.xDamped, 0, width, ogRotX - 0.1, ogRotX + 0.1) * -1;
-        camera.rotation.x = map(mouse.yDamped, 0, height, ogRotY - 0.1, ogRotY + 0.1) * -1;
-        camera.rotation.z = map(mouse.xDamped, 0, width, ogRotX - 0.1, ogRotX + 0.1) * -1;
+        camera.rotation.y = map(mouse.xDamped, 0, width, 0.1, -0.1) * -1;
+        camera.rotation.x = map(mouse.yDamped, 0, height, 0.1, -0.1) * -1;
+        camera.rotation.z = map(mouse.xDamped, 0, width, 0.1, -0.1) * -1;
+
 
         if (flying == true) {
 
