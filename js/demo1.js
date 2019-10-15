@@ -70,9 +70,9 @@ function createLandscape(params) {
     function onMouseMove() {
         mouse2.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse2.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        if (!!jetObj) {
-            var deltaX = jetObj.position.x - be.position.x;
-            var deltaY = jetObj.position.y - be.position.y + 2;
+        if (!!jetObj && !!basketObj) {
+            var deltaX = jetObj.position.x - basketObj.position.x;
+            var deltaY = jetObj.position.y - basketObj.position.y + 2;
         }
         if ((-5 < deltaX) && (deltaX < 5) && (-5 < deltaY) && (deltaY < 5)) {
             over = true;
@@ -87,8 +87,7 @@ function createLandscape(params) {
         }
 
 
-
-        var planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 50);
+        var planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 70);
         var mv = new THREE.Vector3(
             (event.clientX / window.innerWidth) * 2 - 1,
             -(event.clientY / window.innerHeight) * 2 + 1,
@@ -101,6 +100,10 @@ function createLandscape(params) {
         pointB2.x = pos2.x;
         pointB2.y = pos2.y;
         pointB2.z = -1;
+
+        try{
+            basketObj.position.y = pos2.y;
+            basketObj.position.x = pos2.x;} catch(er){console.log(er)}
 
         pointC2.z = 100;
 
@@ -180,7 +183,7 @@ function createLandscape(params) {
         material2.depthTest = false;
 
         material4.name = "jetColor";
-        material3.depthTest = false;
+//        material3.depthTest = false;
         be = new THREE.Mesh(geometry, material3);
         be.renderOrder = 20;
         be.name = "target";
@@ -225,9 +228,9 @@ function createLandscape(params) {
                 basketObj = object.children[0];
                 basketObj.material = material3;
                 basketObj.scale.set(0.6, 0.6, 0.6);
-                basketObj.position.set(0, 8, -100);
+                basketObj.position.set(0, 8, -70);
                 basketObj.rotation.x = Math.PI / 1;
-                basketObj.rotation.y = Math.PI / 1;
+//                basketObj.rotation.y = Math.PI / 2;
             }
         );
 
@@ -546,11 +549,11 @@ loader2.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
         if (!!jetObj && !crashed && !!basketObj) {
             jetObj.rotation.y = map(mouse.xDamped, 0, width, ogRotYjet - 0.5, ogRotYjet + 0.5);
             jetObj.rotation.x = map(mouse.yDamped, 0, height, ogRotXjet - 0.1, ogRotXjet + 0.1) * -1;
+jetObj.position.y = pos.y;
+        jetObj.position.x = pos.x;
 
-            basketObj.position.y = map(mouse.yDamped, 0, height, pos.y + 15 * mul, pos.y - 15 * mul);
-            basketObj.position.x = map(mouse.xDamped, 0, width, pos.x - 30 * mul, pos.x + 30 * mul);
             basketObj.up = new THREE.Vector3(-1, 0, 0);
-            pointA2 = new THREE.Vector3(basketObj.position.x, basketObj.position.y, -100);
+            pointA2 = new THREE.Vector3(basketObj.position.x, basketObj.position.y, -70);
             curveNew2 = new THREE.CatmullRomCurve3([pointA2, pointB2, pointC2], false, "catmullrom", 0.5);
             geometry3 = new THREE.BufferGeometry().setFromPoints(curveNew2.getPoints(50));
             linePoints.geometry.dispose();
