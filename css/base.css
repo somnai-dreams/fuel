@@ -254,12 +254,14 @@ a:focus {
     display: flex;
     align-content: center;
     justify-content: center;
-    background: black;
+/*    background: white;*/
     z-index: 100;
+    color: black;
 }
 
-#introPage button{
-    height: 30px;
+#introPage h1{
+/*    height: 30px;*/
     margin: auto;
+    color: black !important;
 }
 .nocursor * { cursor: none; }

@@ -3,6 +3,7 @@ createLandscape({
 })
 var crashed = false;
 var win = false;
+var starting = false;
 
 var flying = false;
 
@@ -76,7 +77,7 @@ function createLandscape(params) {
         if ((-5 < deltaX) && (deltaX < 5) && (-5 < deltaY) && (deltaY < 5)) {
             over = true;
             basketObj.material.color.setHex(0x3ecb4e);
-            console.log(over);
+//            console.log(over);
         } else {
             basketObj.material.color.setHex(0xfabb2c);
             if (over) {
@@ -134,6 +135,8 @@ function createLandscape(params) {
         resize()
     }
 
+
+
     function sceneSetup() {
         scene = new THREE.Scene();
         var fogColor = new THREE.Color(0xffffff)
@@ -142,8 +145,8 @@ function createLandscape(params) {
 
         //    sky()
         camera = new THREE.PerspectiveCamera(50, width / height, .1, 10000);
-        camera.position.y = 10;
-        camera.position.z = 4;
+        camera.position.y = 100;
+        camera.position.z = 94;
         ogPozX = camera.position.x;
         ogPozY = camera.position.y;
         ogRotX = camera.rotation.x;
@@ -228,18 +231,19 @@ function createLandscape(params) {
             }
         );
 
-        var geometry = new THREE.PlaneGeometry(0.125, 1.025);
+        var geometry = new THREE.PlaneGeometry(0.105, 1.025);
         var material = new THREE.MeshBasicMaterial({
             color: 0x313131,
             side: THREE.DoubleSide
         });
         material.depthTest = false;
         var plane = new THREE.Mesh(geometry, material);
-        plane.position.set(3, 10, -1)
+        plane.position.set(0, 9, -1)
         plane.renderOrder = 20;
+        plane.rotation.z = Math.PI / 2;
         scene.add(plane);
 
-        var geometry = new THREE.PlaneGeometry(0.1, 1);
+        var geometry = new THREE.PlaneGeometry(0.08, 1);
         var material = new THREE.MeshBasicMaterial({
             color: 0x989898,
             side: THREE.DoubleSide
@@ -247,10 +251,11 @@ function createLandscape(params) {
         var plane = new THREE.Mesh(geometry, material);
         material.depthTest = false;
         plane.renderOrder = 20;
-        plane.position.set(3, 10, -1)
+        plane.position.set(0, 9, -1)
+        plane.rotation.z = Math.PI / 2;
         scene.add(plane);
 
-        var geometry = new THREE.PlaneGeometry(0.1, 1);
+        var geometry = new THREE.PlaneGeometry(0.08, 1);
         var material = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide
@@ -258,11 +263,37 @@ function createLandscape(params) {
         plane2 = new THREE.Mesh(geometry, material);
         material.depthTest = false;
         plane2.renderOrder = 20;
-        plane2.position.set(3, 10, -1)
+        plane2.position.set(0, 9, -1)
         plane2.scale.y = plane2.scale.y - (1 * 0.5);
-        plane2.position.y = plane2.position.y - (1 * 0.5) / 2;
+        plane2.rotation.z = -Math.PI / 2;
+        plane2.position.x = plane2.position.x - (1 * 0.5) / 2;
         scene.add(plane2);
 
+var loader2 = new THREE.FontLoader();
+
+loader2.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+    var textGeo = new THREE.TextGeometry( "F U E L", {
+        font: font,
+
+        size: 0.06,
+        height: 0.000001,
+        curveSegments: 12,
+
+//        bevelThickness: 2,
+//        bevelSize: 5,
+//        bevelEnabled: true
+
+    } );
+
+    var textMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+
+    var mesh = new THREE.Mesh( textGeo, textMaterial );
+    mesh.position.set( -0.5, 9.1, -1 );
+
+    scene.add( mesh );
+
+} );
         var pointArray = [];
 
         for (var i = 0; i < NUM_POINTS; i++) {
@@ -386,6 +417,7 @@ function createLandscape(params) {
 
         terrain = new THREE.Mesh(geometry, material);
         terrain.position.z = -180;
+//        terrain.position.y = 0;
         terrain.rotation.x = -Math.PI / 2;
         terrain.name = "terrain";
 
@@ -484,17 +516,16 @@ function createLandscape(params) {
         camera.rotation.z = map(mouse.xDamped, 0, width, ogRotX - 0.1, ogRotX + 0.1) * -1;
 
         if (flying == true) {
-            console.log(plane2.scale.y);
 
             if (plane2.scale.y >= 1) {
                 won();
                 win = true;
             } else if (over === true && plane2.scale.y <= 1) {
                 plane2.scale.y += 0.001;
-                plane2.position.y += 0.001 / 2;
+                plane2.position.x += 0.001 / 2;
             } else if (over === false && plane2.scale.y > 0) {
                 plane2.scale.y -= 0.001;
-                plane2.position.y -= 0.001 / 2;
+                plane2.position.x -= 0.001 / 2;
             } else if (plane2.scale.y <= 0) {
                 crashed = true;
                 lost();
@@ -524,9 +555,13 @@ function createLandscape(params) {
             geometry3 = new THREE.BufferGeometry().setFromPoints(curveNew2.getPoints(50));
             linePoints.geometry.dispose();
             linePoints.geometry = geometry3;
+            if (starting){
+                linePoints.visibile = false;
+            }
         }
 
         crash(jetObj);
+        start(camera, linePoints);
         flyOff(jetObj);
 
         renderer.render(scene, camera)
@@ -631,8 +666,28 @@ function startFlying() {
     document.getElementById('music').play();
     document.body.classList.add('nocursor');
     flying = true;
+    starting = true;
+
     //      var context = new AudioContext();
 
+}
+var y = 0.5;
+function start(camera, linePoints) {
+
+
+    try {
+        if (flying && camera.position.z > 4) {
+//            y +=0.01;
+            camera.position.z -= y;
+            camera.position.y -= y;
+//            camera.rotation.x -= y;
+        }
+        else {
+            starting = false;
+        }
+    } catch (er) {
+        console.log(er)
+    }
 }
 
 function crash(jetObj) {
