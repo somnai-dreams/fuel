@@ -2,6 +2,8 @@ createLandscape({
     //  palleteImage:'img/pallete5.png'
 })
 var crashed = false;
+var win = false;
+
 var flying = false;
 
 function createLandscape(params) {
@@ -40,7 +42,7 @@ function createLandscape(params) {
     var crashCount = 0;
     //    var crash = false;
     var over = false;
-//    var won = false;
+    //    var won = false;
     var loader = new THREE.OBJLoader();
 
     var NUM_POINTS = 5;
@@ -60,56 +62,26 @@ function createLandscape(params) {
 
 
     function onMousedown(event) {
-        //mouse2.x = (event.clientX / window.innerWidth) * 2 - 1;
-        //        mouse2.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        //
-        //        //        raycaster.setFromCamera(mouse2, camera);
-        //        //
-        //        //        var intersects = raycaster.intersectObject(planeZ);
-        //
-        //        if (!!jetObj) {
-        //            var deltaX = jetObj.position.x - be.position.x;
-        //            var deltaY = jetObj.position.y - be.position.y + 2;
-        //        }
-        //        if ((-5 < deltaX) && (deltaX < 5) && (-5 < deltaY) && (deltaY < 5)) {
-        //            over = true;
-        //            console.log(over);
-        //        } else {
-        //            if (over) {
-        //                over = false;
-        //                crashCount++;
-        ////                if (crashCount > 4) {
-        ////                    crashed = true;
-        ////                }
-        //            }
-        //        }
+
 
     }
 
     function onMouseMove() {
         mouse2.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse2.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        //        raycaster.setFromCamera(mouse2, camera);
-        //
-        //        var intersects = raycaster.intersectObject(planeZ);
-
         if (!!jetObj) {
             var deltaX = jetObj.position.x - be.position.x;
             var deltaY = jetObj.position.y - be.position.y + 2;
         }
         if ((-5 < deltaX) && (deltaX < 5) && (-5 < deltaY) && (deltaY < 5)) {
             over = true;
-            basketObj.material.color.setHex( 0x3ecb4e );
+            basketObj.material.color.setHex(0x3ecb4e);
             console.log(over);
         } else {
-            basketObj.material.color.setHex( 0xfabb2c );
+            basketObj.material.color.setHex(0xfabb2c);
             if (over) {
                 over = false;
                 crashCount++;
-                //                if (crashCount > 4) {
-                //                    crashed = true;
-                //                }
             }
         }
 
@@ -122,45 +94,20 @@ function createLandscape(params) {
             0.5);
         raycaster.setFromCamera(mv, camera);
         pos2 = raycaster.ray.intersectPlane(planeZ);
-        //        console.log(pos2.x, pos2.y, pos2.z);
         mouseProxy.position.y = pos2.y;
         mouseProxy.position.x = pos2.x;
-        //        cone.position.y =  pos2.y;
-        //        cone.position.x = pos2.x;
 
         pointB2.x = pos2.x;
         pointB2.y = pos2.y;
         pointB2.z = -1;
 
-        //        pointC2.x = pos2.x;
-        //        pointC2.y = pos2.y;
         pointC2.z = 100;
 
 
         //        linePoints.verticesNeedUpdate = true;
 
-
     }
 
-//    var timeleft = 3;
-//    var downloadTimer = setInterval(function () {
-//        if (over == true) {
-//            document.getElementById("content__title").innerHTML = timeleft;
-//            //            console.log(timeleft);
-//            timeleft -= 1;
-//            if (timeleft < 0) {
-//                clearInterval(downloadTimer);
-//                document.getElementById("content__title").innerHTML = "GOOD JOB";
-//                animateTitles();
-//                won = true;
-//            }
-//        } else {
-//            //          clearInterval(downloadTimer);
-//            document.getElementById("content__title").innerHTML = '';
-//            timeleft = 3;
-//        }
-//
-//    }, 1000);
 
 
     init();
@@ -240,7 +187,6 @@ function createLandscape(params) {
 
         var pointArray2 = [];
         var pointA2 = new THREE.Vector3(0, 10, -100);
-        //        pointB2 = new THREE.Vector3( -6, 10,-50 );
         pointC2 = new THREE.Vector3(0, 5, -1);
 
         curveNew2 = new THREE.CatmullRomCurve3([pointA2, pointB2, pointC2], false, "catmullrom", 0.9);
@@ -264,7 +210,6 @@ function createLandscape(params) {
                 jetObj.scale.set(0.04, 0.04, 0.04);
                 jetObj.position.set(0, 8, -100);
                 jetObj.rotation.x = Math.PI / 2;
-                //                jetObj.rotation.z = Math.PI /1;
                 ogRotXjet = jetObj.rotation.x;
                 ogRotYjet = jetObj.rotation.y;
             }
@@ -328,15 +273,6 @@ function createLandscape(params) {
             pointArray.push(dotGeometry);
         };
 
-        //         for (var i = 0; i < NUM_POINTS; i++) {
-        //            var x = Math.random() * (1 - -1) - 1;
-        //            var y = (Math.random() * (1 - -1) -1)+12;
-        //            var z = -100;
-        //            var dotGeometry = new THREE.Vector3(x, y, z);
-        //            pointArray.push(dotGeometry);
-        //        };
-
-        //Create a closed wavey loop
         curveNew = new THREE.CatmullRomCurve3(pointArray, true, "catmullrom", 3);
 
         var points = curveNew.getPoints(1000);
@@ -404,31 +340,6 @@ function createLandscape(params) {
         });
         renderer.setPixelRatio = devicePixelRatio;
         renderer.setSize(width, height);
-
-        // Draw line from camera to origin
-        //        var pointA2 = new THREE.Vector3( 0, 0, 0 );
-        //        var pointB2 = new THREE.Vector3( 0, 0, 0 );
-        //        var pointC2 = new THREE.Vector3( 0, 0, 0 );
-        //
-        //
-        //        var points4 = linePoints.getPoints(50);
-        //        var line5 = new THREE.Line( points4, material4 );
-        //        line5.renderOrder = 19;
-        //        scene.add( line5 );
-        //
-        //        var geometry = new THREE.ConeGeometry( 1, 4, 32 );
-        //        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-        //        cone = new THREE.Mesh( geometry, material2);
-        //        cone.renderOrder = 30;
-        //        cone.position.set(0, 8, 0);
-        //        scene.add( cone );
-
-
-
-
-
-
-
     }
 
 
@@ -484,7 +395,6 @@ function createLandscape(params) {
     }
 
     function sceneTextures() {
-        // pallete
         new THREE.TextureLoader().load(params.palleteImage, function (texture) {
             terrain.material.uniforms.pallete.value = texture;
             terrain.material.needsUpdate = true;
@@ -573,31 +483,27 @@ function createLandscape(params) {
         camera.rotation.x = map(mouse.yDamped, 0, height, ogRotY - 0.1, ogRotY + 0.1) * -1;
         camera.rotation.z = map(mouse.xDamped, 0, width, ogRotX - 0.1, ogRotX + 0.1) * -1;
 
-        if (flying == true ){
-                        console.log(plane2.scale.y);
+        if (flying == true) {
+            console.log(plane2.scale.y);
 
-        if (plane2.scale.y >= 1){
-
-            won();
-        }
-        else if (over === true && plane2.scale.y <= 1) {
-            plane2.scale.y += 0.001;
-            plane2.position.y += 0.001 / 2;
-        }
-        else if (over === false && plane2.scale.y > 0) {
-            plane2.scale.y -= 0.001;
-            plane2.position.y -= 0.001 / 2;
-        } else if (plane2.scale.y <= 0){
-            crashed = true;
-            lost();
-
-        }
+            if (plane2.scale.y >= 1) {
+                won();
+                win = true;
+            } else if (over === true && plane2.scale.y <= 1) {
+                plane2.scale.y += 0.001;
+                plane2.position.y += 0.001 / 2;
+            } else if (over === false && plane2.scale.y > 0) {
+                plane2.scale.y -= 0.001;
+                plane2.position.y -= 0.001 / 2;
+            } else if (plane2.scale.y <= 0) {
+                crashed = true;
+                lost();
             }
+        }
 
 
         t += 0.001;
         var pos = curveNew.getPoint(t);
-        //be.position.copy(pos);
         var mul = 2;
 
         be.position.y = map(mouse.yDamped, 0, height, pos.y + 15 * mul, pos.y - 15 * mul);
@@ -607,39 +513,21 @@ function createLandscape(params) {
 
 
         if (!!jetObj && !crashed && !!basketObj) {
-            //            jetObj.position.y = map(mouse.yDamped, 0, height, 9, 11);
-            //            jetObj.position.x = map(mouse.xDamped, 0, width, -1, 1);
             jetObj.rotation.y = map(mouse.xDamped, 0, width, ogRotYjet - 0.5, ogRotYjet + 0.5);
             jetObj.rotation.x = map(mouse.yDamped, 0, height, ogRotXjet - 0.1, ogRotXjet + 0.1) * -1;
 
             basketObj.position.y = map(mouse.yDamped, 0, height, pos.y + 15 * mul, pos.y - 15 * mul);
             basketObj.position.x = map(mouse.xDamped, 0, width, pos.x - 30 * mul, pos.x + 30 * mul);
             basketObj.up = new THREE.Vector3(-1, 0, 0);
-            //            basketObj.lookAt(jetObj.position.x, jetObj.position.y, -110);
             pointA2 = new THREE.Vector3(basketObj.position.x, basketObj.position.y, -100);
-            //        pointB2 = new THREE.Vector3( -6, 10,-50 );
-            //            pointC2 = new THREE.Vector3( 0, 0, 0 );
-
             curveNew2 = new THREE.CatmullRomCurve3([pointA2, pointB2, pointC2], false, "catmullrom", 0.5);
             geometry3 = new THREE.BufferGeometry().setFromPoints(curveNew2.getPoints(50));
-            //        scene.add(linePoints);
-
             linePoints.geometry.dispose();
             linePoints.geometry = geometry3;
         }
 
-
-        //        linePoints.vertices[0].x = be.position.x;
-        //        linePoints.vertices[0].y = be.position.y;
-        //        linePoints.vertices[0].z = -100;
-        //
-        //
-        //        linePoints.verticesNeedUpdate = true;
-
-
-
-
         crash(jetObj);
+        flyOff(jetObj);
 
         renderer.render(scene, camera)
 
@@ -760,20 +648,33 @@ function crash(jetObj) {
     }
 }
 
-var lost = (function() {
+function flyOff(jetObj) {
+    try {
+        if (win) {
+            //            console.log('crash');
+            //            jetObj.rotation.y -= 0.005;
+            jetObj.rotation.x += 0.01;
+            jetObj.position.y += 0.7;
+        }
+    } catch (er) {
+        console.log(er)
+    }
+}
+
+var lost = (function () {
     var executed = false;
-    return function() {
+    return function () {
         if (!executed) {
             executed = true;
             document.getElementById("content__title").innerHTML = "YOU FAILED";
-     animateTitles();
+            animateTitles();
         }
     };
 })();
 
-var won = (function() {
+var won = (function () {
     var executed = false;
-    return function() {
+    return function () {
         if (!executed) {
             executed = true;
             document.getElementById("content__title").innerHTML = "GOOD JOB";
